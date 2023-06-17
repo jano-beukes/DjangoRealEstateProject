@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages, auth
 from django.contrib.auth.models import User
+from mycontacts.models import Mycontacts
 
 def register(request):
     if request.method == 'POST':
@@ -58,8 +59,16 @@ def login(request):
     else:
         return render(request, 'accounts/login.html')
 def logout(request):
-    return redirect('index')
+    if request.method == 'POST':
+        auth.logout(request)
+        messages.success(request, 'You are now logged out')
+        return redirect('index')
 
 def dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    user_contacts = Mycontacts.objects.order_by('-contact_date').filter(user_id=request.user.id)
+
+    context ={
+        'mycontacts': user_contacts
+    }
+    return render(request, 'accounts/dashboard.html', context)
 
